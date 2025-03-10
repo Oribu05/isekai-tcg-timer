@@ -18,7 +18,7 @@
             z-index: 99;
         }
 
-        /* Eliminar las flechas de los inputs de tipo número */
+     
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -31,13 +31,12 @@
 
         body {
             background-color: #1e40af;
-            /* Fondo azul oscuro */
             position: relative;
             margin: 0;
             min-height: 100vh;
         }
 
-        /* Pseudo-elemento para el logo blanco */
+        
         body::before {
             content: "";
             position: absolute;
@@ -47,17 +46,14 @@
             background-position: center;
             background-size: contain;
             filter: brightness(0) invert(1);
-            /* Convierte el negro en blanco */
             z-index: -2;
         }
 
-        /* Pseudo-elemento para la superposición oscura */
         body::after {
             content: "";
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, 0.616);
-            /* Ajusta la opacidad para oscurecer */
             z-index: -1;
         }
 
@@ -121,10 +117,9 @@
     <p class="text-2xl p-3 text-gray-600 absolute bottom-0 right-0">https://isekai-alcorcon.es</p>
     <script>
 
-        document.addEventListener('keydown', (event) => {
-            // Verifica si se presiona Ctrl + N
+        document.addEventListener('keydown', (event) => { 
             if ((event.key === 'ArrowDown')) {
-            event.preventDefault(); // Previene la acción predeterminada (como abrir una nueva ventana)
+            event.preventDefault(); 
             botones = document.getElementById('buttons');
 
             if (botones.style.visibility === 'hidden') {
@@ -260,7 +255,6 @@
             updateClockDisplay(horas, minutos, segundos);
         }
 
-        // Initialize the clock display to 00:00:00
         document.addEventListener("DOMContentLoaded", () => {
             updateClockDisplay(0, 0, 0);
         });
