@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./dist/output.css" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/alarm-clock" rel="stylesheet">
+    <title>Cronómetro</title>
+    <style>
+        .digital-clock {
+            font-family: 'alarm clock', sans-serif;
+            font-size: 15rem;
+            color: rgb(180, 198, 255);
+            display: flex;
+            align-items: center;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+            z-index: 99;
+        }
+
+        /* Eliminar las flechas de los inputs de tipo número */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        body {
+            background-color: #1e40af;
+            /* Fondo azul oscuro */
+            position: relative;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        /* Pseudo-elemento para el logo blanco */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("./src/image/01_Marca-completa_fondo-claro.svg");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            filter: brightness(0) invert(1);
+            /* Convierte el negro en blanco */
+            z-index: -2;
+        }
+
+        /* Pseudo-elemento para la superposición oscura */
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.616);
+            /* Ajusta la opacidad para oscurecer */
+            z-index: -1;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+
+
+        .editable {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-family: inherit;
+            font-size: 1em;
+            text-align: center;
+            width: 18rem;
+            height: 15rem;
+            text-shadow: 2px 2px 4px rgb(0, 98, 255);
+        }
+
+        .colon {
+            font-size: 5rem;
+            margin: 0 0.5rem;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center justify-center h-screen">
+    <div id="cronometro" class="flex flex-col items-center">
+        <div id="clockDisplay" class="digital-clock mb-4">
+            <div>
+                <input type="number" id="horasInput" class="editable" value="00" min="0" oninput="validateInput(this)">
+            </div>
+            <div class="colon">:</div>
+            <div>
+                <input type="number" id="minutosInput" class="editable" value="00" min="0" max="59"
+                    oninput="validateInput(this)">
+            </div>
+            <div class="colon">:</div>
+            <div>
+                <input type="number" id="segundosInput" class="editable" value="00" min="0" max="59"
+                    oninput="validateInput(this)">
+            </div>
+        </div>
+        <div class="flex" id="buttons">
+            <button onclick="iniciarCronometro()" style="box-shadow: 1px 2px blue;" id="startButton"
+                class="outline-none border-2 border-blue-800  shadow-xl shadow-blue-500 text-white px-4 py-2 rounded mr-2 hover:ring-4 hover:ring-blue-800 focus:ring-4 focus:ring-blue-800">
+                Iniciar
+            </button>
+            <button onclick="pausarCronometro()" style="box-shadow: 1px 2px red;" id="pauseButton"
+                class="outline-none border-2 border-red-500 shadow-xl shadow-black text-white px-4 py-2 rounded mr-2 hover:ring-4 hover:ring-red-500 focus:ring-4 focus:ring-red-500">
+                Pausar
+            </button>
+            <button onclick="reiniciarCronometro()" style="box-shadow: 1px 2px yellow;" id="resetButton"
+                class="outline-none border-2 border-yellow-500 shadow-xl text-white px-4 py-2 rounded hover:ring-4 hover:ring-yellow-500 focus:ring-4 focus:ring-yellow-500">
+                Reiniciar
+            </button>
+        </div>
+    </div>
+    <p class="text-2xl p-3 text-gray-600 absolute bottom-0 right-0">https://isekai-alcorcon.es</p>
+    <script>
+
+        document.addEventListener('keydown', (event) => {
+            // Verifica si se presiona Ctrl + N
+            if ((event.key === 'ArrowDown')) {
+            event.preventDefault(); // Previene la acción predeterminada (como abrir una nueva ventana)
+            botones = document.getElementById('buttons');
+
+            if (botones.style.visibility === 'hidden') {
+                botones.style.visibility = 'visible';
+            } else {
+                botones.style.visibility = 'hidden';
+            }
+            }
+        });
+
+        let timer;
+        let isPaused = false;
+        let totalSeconds;
+
+        function iniciarCronometro() {
+            const horas = parseInt(document.getElementById("horasInput").value) || 0;
+            const minutos = parseInt(document.getElementById("minutosInput").value) || 0;
+            const segundos = parseInt(document.getElementById("segundosInput").value) || 0;
+
+            if (minutos > 59 || segundos > 59) {
+            alert("Los minutos y segundos no pueden ser mayores de 59");
+            return;
+            }
+
+            totalSeconds = horas * 3600 + minutos * 60 + segundos;
+
+            if (horas === 0) {
+            document.getElementById("horasInput").style.display = 'none';
+            }
+
+            if (isPaused) {
+            isPaused = false;
+            timer = setInterval(() => {
+                if (totalSeconds <= 0) {
+                clearInterval(timer);
+                var audio = new Audio('audio_file.mp3');
+                audio.play();
+                return;
+                }
+
+                totalSeconds--;
+
+                const horas = Math.floor(totalSeconds / 3600);
+                const minutos = Math.floor((totalSeconds % 3600) / 60);
+                const segundos = totalSeconds % 60;
+
+                updateClockDisplay(horas, minutos, segundos);
+            }, 1000);
+            } else {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (totalSeconds <= 0) {
+                clearInterval(timer);
+                let audio = new Audio('./src/sound/alarm-clock-beep-105903.mp3');
+                let count = 0;
+                let maxRepeats = 3;
+
+                audio.play();
+
+                audio.addEventListener('ended', () => {
+                    count++;
+                    if (count < maxRepeats) {
+                    audio.currentTime = 0;
+                    audio.play();
+                    }
+                    if (count >= 3) {
+                    resetClockDisplay();
+                    
+                    }
+                });
+
+                return;
+                }
+
+                totalSeconds--;
+
+                const horas = Math.floor(totalSeconds / 3600);
+                const minutos = Math.floor((totalSeconds % 3600) / 60);
+                const segundos = totalSeconds % 60;
+
+                updateClockDisplay(horas, minutos, segundos);
+            }, 1000);
+            }
+        }
+        function resetClockDisplay(){
+            document.getElementById("horasInput").value = "00";
+            document.getElementById("minutosInput").value = "00";
+            document.getElementById("segundosInput").value = "00";
+            document.getElementById("horasInput").style.display = 'block';
+            updateClockDisplay(0, 0, 0);
+        }
+        function pausarCronometro() {
+            if (isPaused) {
+            iniciarCronometro();
+            } else {
+            clearInterval(timer);
+            isPaused = true;
+            }
+        }
+
+        function reiniciarCronometro() {
+            clearInterval(timer);
+            isPaused = false;
+            document.getElementById("horasInput").value = "00";
+            document.getElementById("minutosInput").value = "00";
+            document.getElementById("segundosInput").value = "00";
+            document.getElementById("horasInput").style.display = 'block';
+            updateClockDisplay(0, 0, 0);
+        }
+
+        function updateClockDisplay(horas, minutos, segundos) {
+            document.getElementById("horasInput").value = String(horas).padStart(2, '0');
+            document.getElementById("minutosInput").value = String(minutos).padStart(2, '0');
+            document.getElementById("segundosInput").value = String(segundos).padStart(2, '0');
+        }
+
+        function validateInput(input) {
+            if (input.id === "minutosInput" || input.id === "segundosInput") {
+            if (input.value > 59) {
+                input.value = 59;
+            } else if (input.value < 0) {
+                input.value = 0;
+            }
+            }
+            updateClockDisplayFromInput();
+        }
+
+        function updateClockDisplayFromInput() {
+            const horas = parseInt(document.getElementById("horasInput").value) || 0;
+            const minutos = parseInt(document.getElementById("minutosInput").value) || 0;
+            const segundos = parseInt(document.getElementById("segundosInput").value) || 0;
+
+            updateClockDisplay(horas, minutos, segundos);
+        }
+
+        // Initialize the clock display to 00:00:00
+        document.addEventListener("DOMContentLoaded", () => {
+            updateClockDisplay(0, 0, 0);
+        });
+    </script>
+</body>
+
+</html>
